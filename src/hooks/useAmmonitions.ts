@@ -5,7 +5,7 @@ import {
   DEFAULT_PLAYER_WIDTH,
   DEFAULT_PLAYER_HEIGHT,
 } from "../constants";
-import { getEntityFootprintCells, playSound } from "../helpers";
+import { getEntityFootprintCells, isPlayerOverlappingCell, playSound } from "../helpers";
 import { Position } from "../custom-types";
 import { WallProps } from "../components/Wall";
 import { usePowerUpSpawn } from "./usePowerUpSpawn";
@@ -53,9 +53,13 @@ export const useAmmunition = ({
     });
 
   useEffect(() => {
-    const index = ammunitions.findIndex(
-      (ammunition) =>
-        ammunition.x === position.x && ammunition.y === position.y
+    const index = ammunitions.findIndex((ammunition) =>
+      isPlayerOverlappingCell(
+        position,
+        DEFAULT_PLAYER_WIDTH,
+        DEFAULT_PLAYER_HEIGHT,
+        ammunition
+      )
     );
 
     if (index === -1) return;

@@ -235,6 +235,16 @@ export const getEntityFootprintCells = (
   return cells;
 };
 
+export const isPlayerOverlappingCell = (
+  playerPosition: Position,
+  playerWidth: number,
+  playerHeight: number,
+  cell: Position
+) =>
+  getEntityFootprintCells(playerPosition, playerWidth, playerHeight).some(
+    (footprintCell) => footprintCell.x === cell.x && footprintCell.y === cell.y
+  );
+
 export const isOpenGridCell = (
   position: Position,
   walls: WallProps[],
@@ -531,6 +541,49 @@ export const isPointInEnemyBounds = (
   );
 };
 
+const segmentIntersectsEnemyBounds = (
+  start: PixelPoint,
+  end: PixelPoint,
+  enemy: Position
+): number | null => {
+  const left = enemy.x * CELL_SIZE;
+  const top = enemy.y * CELL_SIZE;
+  const right = left + ENEMY_HIT_SIZE;
+  const bottom = top + ENEMY_HIT_SIZE;
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  let tMin = 0;
+  let tMax = 1;
+
+  const clipAxis = (
+    origin: number,
+    direction: number,
+    minBound: number,
+    maxBound: number
+  ): boolean => {
+    if (Math.abs(direction) < 1e-9) {
+      return origin >= minBound && origin <= maxBound;
+    }
+
+    const t1 = (minBound - origin) / direction;
+    const t2 = (maxBound - origin) / direction;
+    tMin = Math.max(tMin, Math.min(t1, t2));
+    tMax = Math.min(tMax, Math.max(t1, t2));
+    return tMin <= tMax;
+  };
+
+  if (!clipAxis(start.x, dx, left, right) || !clipAxis(start.y, dy, top, bottom)) {
+    return null;
+  }
+
+  if (tMax < 0.001 || tMin > 1) {
+    return null;
+  }
+
+  const tEnter = Math.max(tMin, 0.001);
+  return tEnter <= tMax ? tEnter : null;
+};
+
 export const getStandardShotEnemyIndex = (
   playerPosition: Position,
   aimPixel: PixelPoint,
@@ -541,30 +594,8 @@ export const getStandardShotEnemyIndex = (
   const blockedAim = getBlockedAimPoint(playerPosition, aimPixel, walls);
   const end = { x: blockedAim.x, y: blockedAim.y };
 
-  const tryEnemy = (index: number) => {
-    const center = getEnemyCenter(enemies[index]);
-    return hasLineOfSight(playerPosition, center, walls) ? index : -1;
-  };
-
-  const directHit = enemies.findIndex((enemy) =>
-    isPointInEnemyBounds(aimPixel.x, aimPixel.y, enemy)
-  );
-  if (directHit !== -1) {
-    const confirmed = tryEnemy(directHit);
-    if (confirmed !== -1) {
-      return confirmed;
-    }
-  }
-
   const hits = getEnemyHitsOnSegment(start, end, enemies);
-  for (const { index } of hits) {
-    const confirmed = tryEnemy(index);
-    if (confirmed !== -1) {
-      return confirmed;
-    }
-  }
-
-  return -1;
+  return hits.length > 0 ? hits[0].index : -1;
 };
 
 export const getRayDirection = (
@@ -688,20 +719,8 @@ const getEnemyHitsOnSegment = (
   const hits: { index: number; t: number }[] = [];
 
   enemies.forEach((enemy, index) => {
-    const center = getEnemyCenter(enemy);
-    const t = ((center.x - start.x) * dx + (center.y - start.y) * dy) / lengthSquared;
-
-    if (t <= 0.001 || t > 1) {
-      return;
-    }
-
-    const closestPoint = {
-      x: start.x + dx * t,
-      y: start.y + dy * t,
-    };
-    const distance = Math.hypot(center.x - closestPoint.x, center.y - closestPoint.y);
-
-    if (distance <= ENEMY_HIT_SIZE / 2) {
+    const t = segmentIntersectsEnemyBounds(start, end, enemy);
+    if (t !== null) {
       hits.push({ index, t });
     }
   });
