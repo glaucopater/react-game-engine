@@ -1,38 +1,99 @@
-# React Game Engine
+# React Shooter Game Engine
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/43279ffe-701c-4a87-82ec-d1c860db5ccd/deploy-status)](https://app.netlify.com/sites/vitets-react-game/deploys)
 
+Top-down grid shooter built with React and TypeScript.
 
-Live Demo 👽
-
-https://vitets-react-game.netlify.app
+**Live demo:** https://vitets-react-game.netlify.app
 
 ![Demo](/public/demo.png)
 
+## Features
 
-1. **Movement**: Use the arrow keys on your keyboard to move the character (represented by a red square) up, down, left, or right within the game area.
+- **Main menu** with local high-score table (3-letter name, score, level, date)
+- **4 levels** with unique backgrounds (`terrain1` → `terrain3`, then `space1`)
+- **20 kills per level** to advance; difficulty scales each level
+- **Random walls** that block movement and line-of-sight
+- **Smooth enemy movement** with wall sliding
+- **Power-ups**
+  - Ammo
+  - Random food energy pickups
+  - Special weapons: Pierce Rifle, Shotgun, Ricochet Rifle
+  - Power-ups despawn after 7 seconds if not collected (fade-out effect)
+- **Bombs** spawn on the map; shoot them to trigger an explosion and temporary fire zone
+- **Pause / game over / level complete** modals with return to main menu
 
-2. **Shooting Enemies**: Click anywhere within the game area to shoot enemies. Aim at the blue squares to eliminate them. Each time you successfully shoot an enemy, your score will increase.
+## Controls
 
-3. **Winning**: The game ends when you successfully eliminate 20 enemies. You will then see a "You Win!" message along with your final score. You can restart the game by clicking the "Restart" button in the modal.
+| Action | Input |
+|--------|--------|
+| Move | Arrow keys, WASD, or on-screen buttons |
+| Shoot | Click in the game area |
+| Pause | Spacebar or Pause button |
 
-4. **Pausing**: Press the space bar on your keyboard to pause the game at any time. When the game is paused, a modal will appear indicating that the game is paused. To resume the game, click the "Resume" button in the modal.
+## Getting started
 
-5. **Game Over**: If your character collides with an enemy, the game will end. You will see a "Game Over!" message along with your final score. You can restart the game by clicking the "Restart" button in the modal.
+Requirements: Node.js 22+ and Yarn 4.
 
-Enjoy playing the game!
+```bash
+yarn install
+yarn dev
+```
 
+Other scripts:
 
+```bash
+yarn build      # production build
+yarn preview    # preview production build
+yarn typecheck  # TypeScript check
+yarn test       # run tests (Vitest)
+yarn lint       # ESLint
+```
 
-# Credits
+## Gameplay
 
-Sounds:
+1. Start from the **main menu** and try to set a high score.
+2. Eliminate **20 enemies** to complete the current level.
+3. Collect **ammo** and **food** to restore bullets and health.
+4. Pick up **special weapons** for limited powerful shots.
+5. Shoot **bombs** to clear enemies with fire bursts.
+6. Beat all **4 levels** to win. On game over or victory, qualify for the high-score board if your total score is high enough.
 
-Sound Effect by <a href="https://pixabay.com/users/floraphonic-38928062/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=177983">floraphonic</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=177983">Pixabay</a>
+## Tech stack
 
-Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=6787">Pixabay</a>
+- React 19 + TypeScript
+- Vite 8
+- Vitest + React Testing Library + happy-dom
+- LocalStorage for high scores
 
+## Project structure
 
-Sound Effect from <a href="https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=39753">Pixabay</a>
+```
+src/
+  components/   # UI and game entities (Area, Player, Enemy, Bomb, etc.)
+  hooks/        # Game logic (enemies, power-ups, bombs, game state)
+  helpers/      # Shared utilities (collision, spawning, aiming)
+  constants/    # Game balance and assets
+  features/     # Feature flags
+```
 
-Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=48124">Pixabay</a>
+## Configuration
+
+Optional environment variables (see `.env.sample`):
+
+```env
+VITE_ALLOW_ENEMIES="true"
+VITE_ALLOW_POWERUPS="true"
+VITE_ALLOW_PLAYER_IMMORTAL="false"
+```
+
+Feature flags are currently defined in `src/features/index.ts`.
+
+## Credits
+
+Sound effects from [Pixabay](https://pixabay.com/sound-effects/):
+
+- [floraphonic](https://pixabay.com/users/floraphonic-38928062/) — power-up sparkle
+- Pixabay — reload, shotgun, damage sounds
+
+Terrain and space background images are included in `src/assets/images/`.
