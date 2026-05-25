@@ -6,7 +6,7 @@ import {
   DEFAULT_PLAYER_WIDTH,
   DEFAULT_PLAYER_HEIGHT,
 } from "../constants";
-import { getEntityFootprintCells, playSound } from "../helpers";
+import { getEntityFootprintCells, isPlayerOverlappingCell, playSound } from "../helpers";
 import {
   ActiveSpecialWeapon,
   Position,
@@ -86,8 +86,13 @@ export const useSpecialWeapons = ({
   }, [powerUps]);
 
   useEffect(() => {
-    const index = specialWeaponPickups.findIndex(
-      (pickup) => pickup.x === position.x && pickup.y === position.y
+    const index = specialWeaponPickups.findIndex((pickup) =>
+      isPlayerOverlappingCell(
+        position,
+        DEFAULT_PLAYER_WIDTH,
+        DEFAULT_PLAYER_HEIGHT,
+        pickup
+      )
     );
 
     if (index === -1) {

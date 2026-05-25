@@ -8,6 +8,10 @@
   touch-action: none;
 }
 
+.area > * {
+  pointer-events: none;
+}
+
 .game-board {
   display: flex;
   flex-direction: column;
@@ -35,7 +39,7 @@
   justify-content: center;
   align-items: center;
   gap: 16px;
-  min-height: 28px;
+  min-height: 32px;
   padding: 6px 12px;
   background: rgba(0, 0, 0, 0.5);
   color: #f5f5f5;

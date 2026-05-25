@@ -6,7 +6,7 @@ import {
   DEFAULT_PLAYER_HEIGHT,
   getRandomPowerupAvatar,
 } from "../constants";
-import { getEntityFootprintCells, playSound } from "../helpers";
+import { getEntityFootprintCells, isPlayerOverlappingCell, playSound } from "../helpers";
 import { MedikitPickup, Position } from "../custom-types";
 import { WallProps } from "../components/Wall";
 import { usePowerUpSpawn } from "./usePowerUpSpawn";
@@ -68,8 +68,13 @@ export const useMedikits = ({
   }, [powerUps]);
 
   useEffect(() => {
-    const index = medikitPickups.findIndex(
-      (medikit) => medikit.x === position.x && medikit.y === position.y
+    const index = medikitPickups.findIndex((medikit) =>
+      isPlayerOverlappingCell(
+        position,
+        DEFAULT_PLAYER_WIDTH,
+        DEFAULT_PLAYER_HEIGHT,
+        medikit
+      )
     );
 
     if (index === -1) return;

@@ -71,7 +71,11 @@ function App() {
         )}
         {screen === "game" && (
           <>
-            <Game onGameEnd={handleGameEnd} onMainMenu={handleMainMenu} />
+            <Game
+              onGameEnd={handleGameEnd}
+              onMainMenu={handleMainMenu}
+              suppressEndModals={!!pendingHighScore}
+            />
             {pendingHighScore && (
               <HighScoreEntry
                 totalScore={pendingHighScore.totalScore}

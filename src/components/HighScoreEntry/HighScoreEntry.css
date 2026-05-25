@@ -5,7 +5,7 @@
   justify-content: center;
   align-items: center;
   background: rgba(0, 0, 0, 0.78);
-  z-index: 1000;
+  z-index: 3000;
 }
 
 .highscore-entry__panel {

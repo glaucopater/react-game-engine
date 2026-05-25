@@ -50,9 +50,10 @@ const createWallsForLevel = (level: number) =>
 type GameProps = {
   onGameEnd?: (result: GameEndResult) => void;
   onMainMenu?: () => void;
+  suppressEndModals?: boolean;
 };
 
-const Game = ({ onGameEnd, onMainMenu }: GameProps = {}) => {
+const Game = ({ onGameEnd, onMainMenu, suppressEndModals = false }: GameProps = {}) => {
   const hasReportedGameEnd = useRef(false);
   const [walls, setWalls] = useState<WallProps[]>(() => createWallsForLevel(1));
   const [level, setLevel] = useState(1);
@@ -310,7 +311,7 @@ const Game = ({ onGameEnd, onMainMenu }: GameProps = {}) => {
         />
       </div>
 
-      <Modal isOpen={isGameOver} onClose={handleResetGame}>
+      <Modal isOpen={isGameOver && !suppressEndModals} onClose={handleResetGame}>
         <h2>Game Over!</h2>
         <p>Level reached: {level}</p>
         <p>Score: {getTotalScore(level, score)}</p>
@@ -328,7 +329,7 @@ const Game = ({ onGameEnd, onMainMenu }: GameProps = {}) => {
         <button onClick={handleNextLevel}>Next Level</button>
       </Modal>
 
-      <Modal isOpen={isFinalLevelComplete} onClose={handleResetGame}>
+      <Modal isOpen={isFinalLevelComplete && !suppressEndModals} onClose={handleResetGame}>
         <h2>You Win!</h2>
         <p>All {MAX_LEVEL} levels complete.</p>
         <p>Score: {getTotalScore(level, score)}</p>

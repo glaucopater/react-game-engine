@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import { audio, ENEMY_MOVE_SPEED, getEnemyMoveSpeed, getMaxConcurrentEnemies, getMaxTotalEnemySpawns, getWallCountForLevel } from "../constants";
-import { generateRandomWalls, getRandomOpenPosition, getBlockedAimPoint, getEntityFootprintCells, getPlayerNextLeft, hasLineOfSight, isEnemyCollidingWithPlayer, isEnemyPositionBlocked, getEnemyNextPosition, isOpenGridCell, isPositionOnWall, playSound, getEnemiesHitByPierceShot, getEnemiesHitByShotgun, traceRicochetPath, getSpecialWeaponAimPath, isPointInGridCell, getStandardShotEnemyIndex } from "./index";
+import { generateRandomWalls, getRandomOpenPosition, getBlockedAimPoint, getEntityFootprintCells, isPlayerOverlappingCell, getPlayerNextLeft, hasLineOfSight, isEnemyCollidingWithPlayer, isEnemyPositionBlocked, getEnemyNextPosition, isOpenGridCell, isPositionOnWall, playSound, getEnemiesHitByPierceShot, getEnemiesHitByShotgun, traceRicochetPath, getSpecialWeaponAimPath, isPointInGridCell, getStandardShotEnemyIndex } from "./index";
 import { RICOCHET_MAX_BOUNCES, SHOTGUN_AOE_RADIUS } from "../constants";
 
 describe("generateRandomWalls", () => {
@@ -102,6 +102,17 @@ describe("getRandomOpenPosition", () => {
         blocked.some((cell) => cell.x === position?.x && cell.y === position?.y)
       ).toBe(false);
     }
+  });
+});
+
+describe("isPlayerOverlappingCell", () => {
+  it("detects overlap with any part of the 2x2 player footprint", () => {
+    const pickup = { x: 6, y: 10 };
+
+    expect(isPlayerOverlappingCell({ x: 6, y: 10 }, 2, 2, pickup)).toBe(true);
+    expect(isPlayerOverlappingCell({ x: 5, y: 10 }, 2, 2, pickup)).toBe(true);
+    expect(isPlayerOverlappingCell({ x: 5, y: 9 }, 2, 2, pickup)).toBe(true);
+    expect(isPlayerOverlappingCell({ x: 7, y: 11 }, 2, 2, pickup)).toBe(false);
   });
 });
 
@@ -312,6 +323,44 @@ describe("enemy movement", () => {
     );
 
     expect(clickedEnemyIndex).toBe(0);
+  });
+
+  it("hits enemies above and below the player", () => {
+    const playerPosition = { x: 9, y: 11 };
+    const enemyAbove = { x: 9, y: 5 };
+    const enemyBelow = { x: 9, y: 14 };
+
+    expect(
+      getStandardShotEnemyIndex(
+        playerPosition,
+        { x: 195, y: 115 },
+        [enemyAbove],
+        []
+      )
+    ).toBe(0);
+
+    expect(
+      getStandardShotEnemyIndex(
+        playerPosition,
+        { x: 195, y: 295 },
+        [enemyBelow],
+        []
+      )
+    ).toBe(0);
+  });
+
+  it("hits enemies along the sprite edge when shooting upward", () => {
+    const playerPosition = { x: 9, y: 11 };
+    const enemyAbove = { x: 10, y: 6 };
+
+    expect(
+      getStandardShotEnemyIndex(
+        playerPosition,
+        { x: 200, y: 135 },
+        [enemyAbove],
+        []
+      )
+    ).toBe(0);
   });
 });
 
